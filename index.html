@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>مای مونتا — پیکربندی شیر ظرفشویی</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#eceef0; --panel:#ffffff; --ink:#1b1d20; --ink-2:#42464b; --muted:#878d93;
+  --line:#e7e9ec; --line-2:#eef0f2; --chip:#f4f5f7;
+  --accent:oklch(0.56 0.072 236); --accent-soft:oklch(0.95 0.02 236);
+  --ok:oklch(0.62 0.11 150);
+  --shadow-sm:0 1px 2px rgba(20,24,28,.05),0 1px 1px rgba(20,24,28,.04);
+  --shadow-md:0 8px 28px -10px rgba(20,24,28,.22);
+  --r:14px; --r-sm:10px;
+  font-synthesis-weight:none;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:Vazirmatn,system-ui,sans-serif; background:var(--bg); color:var(--ink);
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; overflow:hidden;
+}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+.mono{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-variant-numeric:tabular-nums;direction:ltr}
+
+/* ---------- layout ---------- */
+.app{display:flex;flex-direction:column;height:100vh;height:100dvh}
+
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;flex:0 0 auto;
+  height:62px;padding:0 26px;background:var(--panel);border-bottom:1px solid var(--line);
+  z-index:20;
+}
+.brand{display:flex;align-items:center;gap:11px}
+.brand .glyph{
+  width:30px;height:30px;border-radius:8px;display:grid;place-items:center;
+  background:linear-gradient(150deg,#2b2e33,#15171a);color:#fff;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18),var(--shadow-sm);
+}
+.brand .glyph svg{width:16px;height:16px}
+.brand .name{font-weight:700;font-size:17px;letter-spacing:-.01em}
+.brand .name b{font-weight:800}
+.brand .tag{font-size:11px;color:var(--muted);margin-top:1px;font-weight:500}
+.topbar-actions{display:flex;align-items:center;gap:8px}
+
+.btn{
+  display:inline-flex;align-items:center;gap:7px;height:38px;padding:0 15px;border-radius:10px;
+  font-size:13px;font-weight:600;color:var(--ink-2);background:var(--chip);
+  border:1px solid transparent;transition:.16s ease;white-space:nowrap;
+}
+.btn:hover{background:#edeff1;color:var(--ink)}
+.btn svg{width:15px;height:15px;opacity:.8}
+.btn.primary{background:var(--ink);color:#fff}
+.btn.primary:hover{background:#000}
+.btn.ghost{background:transparent;border-color:var(--line)}
+.btn.ghost:hover{background:var(--chip)}
+
+.main{display:grid;grid-template-columns:1fr 392px;flex:1 1 auto;min-height:0}
+
+/* ---------- stage ---------- */
+.stage{position:relative;min-width:0;display:grid;place-items:center;overflow:hidden;
+  background:
+    radial-gradient(125% 95% at 50% 30%,#ffffff 0%,#eef0f2 58%,#e4e7ea 100%);
+}
+.stage::after{ /* vignette */
+  content:"";position:absolute;inset:0;pointer-events:none;
+  box-shadow:inset 0 0 160px 40px rgba(60,66,72,.05);
+}
+.stage-inner{position:relative;width:100%;height:100%;display:grid;place-items:center}
+#faucetSvg{width:auto;height:88%;max-height:660px;max-width:90%;overflow:visible;z-index:2;
+  filter:drop-shadow(0 26px 26px rgba(28,32,38,.10))}
+.metal path{fill:none;stroke-linecap:round;stroke-linejoin:round}
+.part{cursor:pointer}
+.glow path{fill:none;stroke-linecap:round;stroke-linejoin:round;
+  stroke:var(--accent);opacity:0;transition:opacity .2s ease}
+.part:hover .glow path{opacity:.16}
+.part.sel .glow path{opacity:.34}
+
+/* floating part label */
+.partTag{
+  position:absolute;z-index:6;transform:translate(50%,-50%);pointer-events:none;
+  background:var(--ink);color:#fff;font-size:12px;font-weight:600;padding:5px 11px;border-radius:999px;
+  white-space:nowrap;opacity:0;transition:opacity .18s ease, transform .18s ease;box-shadow:var(--shadow-md)}
+.partTag.on{opacity:1}
+.partTag::after{content:"";position:absolute;bottom:-4px;right:50%;transform:translateX(50%) rotate(45deg);
+  width:8px;height:8px;background:var(--ink)}
+
+.stage-hint{
+  position:absolute;bottom:18px;left:50%;transform:translateX(-50%);z-index:6;
+  font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px;
+  background:rgba(255,255,255,.7);backdrop-filter:blur(6px);padding:7px 14px;border-radius:999px;
+  border:1px solid var(--line)}
+.stage-hint svg{width:14px;height:14px}
+
+.zoomctl{position:absolute;top:18px;left:18px;z-index:6;display:flex;gap:6px}
+.zoomctl button{width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.82);
+  backdrop-filter:blur(6px);border:1px solid var(--line);display:grid;place-items:center;color:var(--ink-2)}
+.zoomctl button:hover{background:#fff;color:var(--ink)}
+.zoomctl svg{width:16px;height:16px}
+
+/* ---------- panel ---------- */
+.panel{background:var(--panel);border-inline-start:1px solid var(--line);
+  display:flex;flex-direction:column;min-height:0}
+.panel-head{padding:22px 24px 16px;border-bottom:1px solid var(--line-2)}
+.panel-head h1{font-size:19px;font-weight:700;letter-spacing:-.01em}
+.panel-head p{font-size:12.5px;color:var(--muted);margin-top:4px;line-height:1.6}
+
+.parts{flex:1 1 auto;overflow-y:auto;padding:14px 16px 8px}
+.parts::-webkit-scrollbar{width:9px}
+.parts::-webkit-scrollbar-thumb{background:#dfe2e5;border-radius:9px;border:3px solid var(--panel)}
+
+.part-row{border:1px solid var(--line);border-radius:var(--r);margin-bottom:10px;overflow:hidden;
+  transition:border-color .16s ease, box-shadow .16s ease;background:var(--panel)}
+.part-row.open{border-color:#d7dbdf;box-shadow:var(--shadow-sm)}
+.part-head{display:flex;align-items:center;gap:13px;padding:13px 14px;width:100%;text-align:start}
+.part-head:hover{background:#fafbfc}
+.swatch-dot{width:30px;height:30px;border-radius:9px;flex:0 0 auto;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.08),inset 0 -6px 8px -4px rgba(0,0,0,.25),inset 0 5px 7px -4px rgba(255,255,255,.7)}
+.part-meta{flex:1 1 auto;min-width:0}
+.part-meta .pn{font-size:14px;font-weight:600;display:flex;align-items:center;gap:7px}
+.part-meta .pv{font-size:11.5px;color:var(--muted);margin-top:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.idx{font-size:10px;color:var(--muted);background:var(--chip);border-radius:6px;
+  padding:1px 6px;font-weight:600;line-height:1.7}
+.chev{width:18px;height:18px;color:var(--muted);transition:transform .2s ease;flex:0 0 auto}
+.part-row.open .chev{transform:rotate(-180deg)}
+
+.part-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .26s ease}
+.part-row.open .part-body{grid-template-rows:1fr}
+.part-body>div{overflow:hidden}
+.pb-inner{padding:4px 14px 16px}
+
+.sec-label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.02em;
+  margin:10px 2px 9px;display:flex;align-items:center;gap:6px}
+
+/* model picker */
+.models{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.model-card{border:1.5px solid var(--line);border-radius:11px;padding:8px;display:flex;flex-direction:column;
+  align-items:center;gap:5px;transition:.15s ease;background:#fcfcfd}
+.model-card:hover{border-color:#cfd4d8;background:#fff}
+.model-card.on{border-color:var(--accent);background:var(--accent-soft)}
+.model-card svg{width:100%;height:54px}
+.model-card .mn{font-size:11px;font-weight:600;color:var(--ink-2);text-align:center;line-height:1.4}
+.model-card.on .mn{color:var(--ink)}
+
+/* finish swatches */
+.finishes{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.fin{display:flex;flex-direction:column;align-items:center;gap:6px}
+.fin button{width:100%;aspect-ratio:1;border-radius:11px;position:relative;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.07),inset 0 -7px 10px -5px rgba(0,0,0,.32),inset 0 6px 9px -5px rgba(255,255,255,.65);
+  transition:transform .14s ease}
+.fin button:hover{transform:translateY(-2px)}
+.fin button.on{box-shadow:0 0 0 2px var(--panel),0 0 0 4px var(--accent),inset 0 -7px 10px -5px rgba(0,0,0,.32)}
+.fin button.on::after{content:"";position:absolute;inset:0;margin:auto;width:16px;height:16px;border-radius:50%;
+  background:rgba(255,255,255,.9);box-shadow:0 1px 3px rgba(0,0,0,.3);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23111' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:center;background-size:12px}
+.fin .fl{font-size:10px;color:var(--muted);text-align:center;line-height:1.3;font-weight:500}
+.fin button.on + .fl{color:var(--ink);font-weight:600}
+
+/* footer */
+.panel-foot{flex:0 0 auto;padding:14px 18px;border-top:1px solid var(--line-2);
+  display:flex;gap:9px;background:var(--panel)}
+.panel-foot .btn{flex:1;height:44px;justify-content:center;font-size:13.5px}
+
+/* toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,16px);z-index:60;
+  background:var(--ink);color:#fff;font-size:13px;font-weight:500;padding:11px 18px;border-radius:11px;
+  box-shadow:var(--shadow-md);opacity:0;pointer-events:none;transition:.24s cubic-bezier(.2,.7,.3,1);
+  display:flex;align-items:center;gap:9px}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.toast svg{width:16px;height:16px;color:var(--ok)}
+
+/* share modal */
+.modal-bg{position:fixed;inset:0;z-index:50;background:rgba(24,28,32,.34);backdrop-filter:blur(3px);
+  display:grid;place-items:center;opacity:0;pointer-events:none;transition:.2s ease}
+.modal-bg.on{opacity:1;pointer-events:auto}
+.modal{background:var(--panel);border-radius:18px;width:min(440px,92vw);padding:26px;box-shadow:var(--shadow-md);
+  transform:scale(.96);transition:.2s cubic-bezier(.2,.7,.3,1)}
+.modal-bg.on .modal{transform:scale(1)}
+.modal h3{font-size:17px;font-weight:700}
+.modal p{font-size:13px;color:var(--muted);margin-top:6px;line-height:1.7}
+.link-box{display:flex;gap:8px;margin-top:18px}
+.link-box input{flex:1;height:42px;border:1px solid var(--line);border-radius:10px;padding:0 12px;
+  font-size:12px;background:var(--chip);color:var(--ink-2);min-width:0}
+.modal .row{display:flex;gap:9px;margin-top:14px}
+.modal .row .btn{flex:1;height:42px;justify-content:center}
+.summary{margin-top:18px;border-top:1px solid var(--line-2);padding-top:14px;display:grid;gap:8px}
+.summary .srow{display:flex;align-items:center;justify-content:space-between;font-size:12.5px}
+.summary .srow .l{color:var(--muted);display:flex;align-items:center;gap:8px;flex-shrink:0}
+.summary .srow .sd{width:16px;height:16px;border-radius:5px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.1)}
+.summary .srow .v{font-weight:600;white-space:nowrap;text-align:start}
+
+@media (max-width:900px){
+  .main{grid-template-columns:1fr}
+  .stage{display:none}
+  body{overflow:auto}
+  .panel{border:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <span class="glyph" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 2l3.5 6.5L22 12l-6.5 3.5L12 22l-3.5-6.5L2 12l6.5-3.5L12 2z" fill="currentColor"/></svg>
+      </span>
+      <span>
+        <span class="name">مای <b>مونتا</b></span>
+        <span class="tag" style="display:block">پیکربندی شیر ظرفشویی سفارشی</span>
+      </span>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn ghost" id="resetBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+        بازنشانی
+      </button>
+      <button class="btn primary" id="shareBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+        ذخیره و اشتراک طرح
+      </button>
+    </div>
+  </header>
+
+  <div class="main">
+    <section class="stage">
+      <div class="zoomctl">
+        <button id="zoomIn" title="بزرگ‌نمایی"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+        <button id="zoomOut" title="کوچک‌نمایی"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg></button>
+      </div>
+      <div class="stage-inner" id="stageInner">
+        <div class="partTag" id="partTag"></div>
+        <svg id="faucetSvg" viewBox="0 0 420 600" role="img" aria-label="پیش‌نمایش شیر">
+          <defs>
+            <filter id="glowF" x="-40%" y="-40%" width="180%" height="180%">
+              <feGaussianBlur stdDeviation="6"/>
+            </filter>
+            <radialGradient id="contactG" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="rgba(30,34,40,.30)"/>
+              <stop offset="60%" stop-color="rgba(30,34,40,.14)"/>
+              <stop offset="100%" stop-color="rgba(30,34,40,0)"/>
+            </radialGradient>
+            <linearGradient id="reflFade" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#fff" stop-opacity=".5"/>
+              <stop offset="38%" stop-color="#fff" stop-opacity="0"/>
+            </linearGradient>
+            <mask id="reflMask"><rect x="0" y="514" width="420" height="320" fill="url(#reflFade)"/></mask>
+          </defs>
+          <ellipse cx="210" cy="540" rx="96" ry="15" fill="url(#contactG)"/>
+          <g id="reflection" opacity=".5" mask="url(#reflMask)"></g>
+          <g id="faucet"></g>
+        </svg>
+      </div>
+      <div class="stage-hint">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11.5V6a2 2 0 1 1 4 0v5"/><path d="M13 7a2 2 0 1 1 4 0v5"/><path d="M17 8.5a2 2 0 1 1 3 0v4.5a7 7 0 0 1-7 7h-1.5a6 6 0 0 1-4.6-2.2L4 16c-1-1.3-.6-2.6.6-3.2 1-.5 2 .1 2.4.8"/></svg>
+        برای انتخاب، روی هر قسمت از شیر کلیک کنید
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="panel-head">
+        <h1>شیر را سفارشی کنید</h1>
+        <p>رنگ هر قسمت را جداگانه انتخاب کنید و مدل علم و دسته را تغییر دهید. تغییرات بلافاصله روی پیش‌نمایش اعمال می‌شود.</p>
+      </div>
+      <div class="parts" id="parts"></div>
+      <div class="panel-foot">
+        <button class="btn ghost" id="randomBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M21 3l-7 7"/><path d="M8 21H3v-5"/><path d="M3 21l7-7"/><path d="M3 3l7 7"/><path d="M21 21l-7-7"/></svg>
+          ترکیب تصادفی
+        </button>
+        <button class="btn primary" id="shareBtn2">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+          ذخیره طرح
+        </button>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h3>طرح شما آماده است</h3>
+    <p>این پیوند، پیکربندی فعلی شیر شما را ذخیره می‌کند. آن را کپی کنید یا برای دیگران بفرستید تا دقیقاً همین طرح را ببینند.</p>
+    <div class="link-box">
+      <input type="text" id="shareLink" class="mono" readonly />
+      <button class="btn primary" id="copyBtn" style="height:42px">کپی</button>
+    </div>
+    <div class="summary" id="summary"></div>
+    <div class="row">
+      <button class="btn ghost" id="closeModal">بستن</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+  <span id="toastMsg">انجام شد</span>
+</div>
+
+<script src="faucet-data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
